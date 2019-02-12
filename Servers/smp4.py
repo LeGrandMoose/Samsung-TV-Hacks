@@ -112,7 +112,7 @@ class TVControl:
 				'<s:Body>'+\
 			'</s:Envelope>'	
 		self.SendSOAP('GetHTSAllSpeakerLevel',body)		
-tvcontrol=TVControl("192.168.0.90:7676")
+tvcontrol=TVControl("192.168.1.181:7676")
 
 tvcontrol.GetAvailableActions()
 tvcontrol.GetHTSAllSpeakerLevel()
