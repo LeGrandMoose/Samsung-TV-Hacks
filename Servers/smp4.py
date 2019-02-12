@@ -105,7 +105,7 @@ class TVControl:
 			'</s:Envelope>'
 		self.SendSOAP('GetCurrentBrowserURL',body)	
 
-tvcontrol=TVControl("192.168.1.9:7676")
+tvcontrol=TVControl("192.168.0.90:7676")
 
 tvcontrol.GetAvailableActions()
 
