@@ -111,7 +111,4 @@ tvcontrol.GetAvailableActions()
 
 tvcontrol.GetSourceList()
 tvcontrol.GetCurrentExternalSource()
-tvcontrol.SendMBRIRKey()
-tvcontrol.StartCloneView()
 
-tvcontrol.GetLiveStream('http://192.168.1.9:9090/liveStream/1')
