@@ -111,11 +111,21 @@ class TVControl:
 					'<u:GetHTSAllSpeakerLevel xmlns:u="urn:samsung.com:service:MainTVAgent2:1"></u:GetHTSAllSpeakerLevel>'+\
 				'<s:Body>'+\
 			'</s:Envelope>'	
-		self.SendSOAP('GetHTSAllSpeakerLevel',body)		
-tvcontrol=TVControl("192.168.1.181:7676")
+		self.SendSOAP('GetHTSAllSpeakerLevel',body)	
 
-tvcontrol.GetAvailableActions()
+	def GetCurrentTime(self):
+		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
+				'<s:Body>'+\
+					'<u:GetCurrentTime xmlns:u="urn:samsung.com:service:MainTVAgent2:1"></u:GetCurrentTime>'+\
+				'</s:Body>'+\
+			'</s:Envelope>'
+		self.SendSOAP('GetCurrentTime',body)	
+		
+tvcontrol=TVControl("192.168.0.90:7676")
+
+'''tvcontrol.GetAvailableActions()
 tvcontrol.GetHTSAllSpeakerLevel()
 tvcontrol.GetSourceList()
-tvcontrol.GetCurrentExternalSource()
-
+tvcontrol.GetCurrentExternalSource()'''
+tvcontrol.GetCurrentTime()
+tvcontrol.GetCurrentMainTVChannel()
