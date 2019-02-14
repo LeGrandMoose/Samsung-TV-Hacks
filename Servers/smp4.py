@@ -1,7 +1,23 @@
-import httplib, urllib2
+import httplib, urllib2, pickle
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 
+
+sources = { "SCART": 65,
+		  	"TV": 0, 
+		  	"HDMI1": 57, 
+		  	"HDMI2": 58, 
+		  	"HDMI3": 59, 
+		  	"HDMI4": 60, 
+		  	"AV": 28, 
+		  	"COMPONENT": 41
+		   }
 
 class TVControl:
+
+
 	def __init__(self,hostname):
 		self.Hostname=hostname
 
@@ -19,10 +35,27 @@ class TVControl:
 		response = conn.getresponse()
 		print(response.status, response.reason)
 
-		data = response.read()
 
+		with open('dump.xml', 'w'): pass
+
+		data = (response.read())
+		file = open('dump.xml', 'w')
+		file.write(data)
+		file.close()
+		out = ''
+		for event, elem in ET.iterparse(dump.xml):
+			if event == 'end':
+				if elem.tag == 'Result':
+					out = elem.txt 
+			elem.clear()
+
+
+
+		print('result ',out)
 		print data
-		print ''
+		#print ''
+		#print data[data.index('<CurrentExternalSource>'):data.index('</CurrentExternalSource')]
+
 
 		return data
 
@@ -33,14 +66,6 @@ class TVControl:
 				'</s:Body>'+\
 			'</s:Envelope>'
 		self.SendSOAP('GetSourceList',body)
-
-	def GetCurrentMainTVChannel(self):
-		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
-			 	'<s:Body>'+\
-			 		'<u:GetCurrentMainTVChannel xmlns:u="urn:samsung.com:service:MainTVAgent2:1"></u:GetCurrentMainTVChannel>'+\
-			 	'</s:Body>'+\
-			 '</s:Envelope>'
-		self.SendSOAP('GetCurrentMainTVChannel',body)
 
 	def GetCurrentExternalSource(self):
 		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
@@ -62,6 +87,18 @@ class TVControl:
 			'</s:Envelope>'
 		self.SendSOAP('SendMBRIRKey',body)
 
+	def SetMainTvSource(self):
+		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
+				'<s:Body>'+\
+					'<u:SetMainTVSource xmlns:u="urn:samsung.com:service:MainTVAgent2:1">'+\
+						'<Source>%s</Source>' % source+\
+						'<ID>%s</ID>'% id1+\
+						'<UiID>0</UiID>'+\
+					'</u:SetMainTVSource>'+\
+				'</s:Body>'+\
+			'</s:Envelope>'
+		self.SendSOAP('SetMainTVSource',body)
+
 	def StartCloneView(self):
 		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
 			'<s:Body>'+\
@@ -72,60 +109,17 @@ class TVControl:
 			'</s:Body></s:Envelope>'
 		self.SendSOAP('StartCloneView',body)
 
-	def GetLiveStream(self,url):
-		req = urllib2.urlopen(url)
+
+if __name__ == '__main__':
+	global source, id1
+	print ("Your choice of Sources:")
+	print ("SCART\nTV\nHMDI1\nHDMI2\nHDMI3\nHDMI4\nAV\nCOMPONENT")
+	print ("Which would you like to use?")
+	source = raw_input()
+	id1 = sources[source]	
 		
-		while True:
-			chunk = req.read(512)
-			if not chunk:
-				break
-			print len(chunk)
+	tvcontrol=TVControl("192.168.0.181:7676")
 
-	def GetAvailableActions(self):
-		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
-				'<s:Body>'+\
-					'<u:GetAvailableActions xmlns:u="urn:samsung.com:service:MainTVAgent2:1"></u:GetAvailableActions>'+\
-				'</s:Body>'+\
-			'</s:Envelope>'
-		self.SendSOAP('GetAvailableActions',body)		
-
-	def RunBrowser(self):
-		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
-				'<s:Body>'+\
-					'<u:RunBrowser xmlns:u="urn:samsung.com:service:MainTVAgent2:1"></u:RunBrowser>'+\
-				'</s:Body>'+\
-			'</s:Envelope>'
-		self.SendSOAP('RunBrowser',body)			
-
-	def GetCurrentBrowserURL(self):
-		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
-				'<s:Body>'+\
-					'<u:GetCurrentBrowserURL xmlns:u="urn:samsung.com:service:MainTVAgent2:1"></u:GetCurrentBrowserURL>'+\
-				'</s:Body>'+\
-			'</s:Envelope>'
-		self.SendSOAP('GetCurrentBrowserURL',body)	
-
-	def GetHTSAllSpeakerLevel(self):
-		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
-				'<s:Body>'+\
-					'<u:GetHTSAllSpeakerLevel xmlns:u="urn:samsung.com:service:MainTVAgent2:1"></u:GetHTSAllSpeakerLevel>'+\
-				'<s:Body>'+\
-			'</s:Envelope>'	
-		self.SendSOAP('GetHTSAllSpeakerLevel',body)	
-
-	def GetCurrentTime(self):
-		body='<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'+\
-				'<s:Body>'+\
-					'<u:GetCurrentTime xmlns:u="urn:samsung.com:service:MainTVAgent2:1"></u:GetCurrentTime>'+\
-				'</s:Body>'+\
-			'</s:Envelope>'
-		self.SendSOAP('GetCurrentTime',body)	
-		
-tvcontrol=TVControl("192.168.0.90:7676")
-
-'''tvcontrol.GetAvailableActions()
-tvcontrol.GetHTSAllSpeakerLevel()
-tvcontrol.GetSourceList()
-tvcontrol.GetCurrentExternalSource()'''
-tvcontrol.GetCurrentTime()
-tvcontrol.GetCurrentMainTVChannel()
+	tvcontrol.SetMainTvSource()
+	tvcontrol.GetCurrentExternalSource()
+	#tvcontrol.GetSourceList()
